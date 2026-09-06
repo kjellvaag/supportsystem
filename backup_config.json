@@ -1,0 +1,8 @@
+{
+  "kildefil": "Supportsystem.xlsx",
+  "lokal_backupmappe": "backups",
+  "nettverk_backupmappe": "",
+  "intervall_minutter": 60,
+  "behold_antall": 10,
+  "loggfil": "backups\\backup.log"
+}
