@@ -1,0 +1,61 @@
+=== build_donor.py start ===
+AccessVBOM før: 1
+AccessVBOM satt til 1 i HKCU
+Excel versjon: 16.0
+Excel bitness: ukjent
+Ark etter oppsett (7 stk):
+  [1] Dashboard
+  [2] Saker
+  [3] Søk KB
+  [4] Søk saker
+  [5] Kunnskapsbase
+  [6] Oppsett
+  [7] Instruksjoner
+codeName OK: 'Dashboard' = Sheet1
+codeName OK: 'Saker' = Sheet2
+codeName OK: 'Søk KB' = Sheet3
+codeName OK: 'Søk saker' = Sheet4
+codeName OK: 'Kunnskapsbase' = Sheet5
+codeName OK: 'Oppsett' = Sheet6
+codeName OK: 'Instruksjoner' = Sheet7
+Importerte ModFelles.bas som ModFelles
+Importerte ModSok.bas som ModSok
+Importerte ModDashboard.bas som ModDashboard
+Importerte ModTidsstempel.bas som ModTidsstempel
+La til Worksheet_Change i Sheet2
+La til Worksheet_Change i Sheet3
+La til Worksheet_Change i Sheet4
+La til Workbook_SheetActivate i ThisWorkbook
+VBComponents etter import:
+  - ModDashboard
+  - ModFelles
+  - ModSok
+  - ModTidsstempel
+  - Sheet1
+  - Sheet2
+  - Sheet3
+  - Sheet4
+  - Sheet5
+  - Sheet6
+  - Sheet7
+  - ThisWorkbook
+Endelig codeName-map:
+  'Dashboard' -> Sheet1
+  'Saker' -> Sheet2
+  'Søk KB' -> Sheet3
+  'Søk saker' -> Sheet4
+  'Kunnskapsbase' -> Sheet5
+  'Oppsett' -> Sheet6
+  'Instruksjoner' -> Sheet7
+Donor lagret: C:\Users\kjell\projects\supportsystem-oc1\vba\donor.xlsm
+Excel avsluttet
+Ekstraherte xl/vbaProject.bin -> C:\Users\kjell\projects\supportsystem-oc1\vba\vbaProject.bin (82944 bytes)
+openpyxl keep_vba: xl/vbaProject.bin tilstede = True
+C:\Users\kjell\projects\supportsystem-oc1\vba\vbaProject.bin størrelse = 82944 bytes
+Excel COM komponenter: ['ModDashboard', 'ModFelles', 'ModSok', 'ModTidsstempel']
+Sheet2 har Worksheet_Change
+Sheet3 har Worksheet_Change
+Sheet4 har Worksheet_Change
+ThisWorkbook har Workbook_SheetActivate
+Excel avsluttet etter verifisering
+=== build_donor.py ferdig ===

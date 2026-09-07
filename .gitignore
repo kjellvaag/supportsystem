@@ -1,0 +1,15 @@
+# VBA-donor: den binære vbaProject.bin + .bas-kilde skal committes,
+# men den makroaktiverte donor-arbeidsboken er kun et byggeledd.
+vba/donor.xlsm
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Backup-mapper
+backups/
+
+# IDE
+.vscode/
+.idea/
