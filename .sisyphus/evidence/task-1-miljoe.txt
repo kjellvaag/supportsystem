@@ -1,0 +1,45 @@
+T1 — RÅ UTDRAG: miljøsjekker (2026-09-07)
+=========================================
+
+[soffice --version]
+soffice : The term 'soffice' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ soffice --version 2>&1; Write-Output "EXIT:$LASTEXITCODE"
++ ~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (soffice:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+[python --version]
+Python 3.11.9
+EXIT:0
+
+[python -c "import openpyxl; print(openpyxl.__version__)"]
+openpyxl 3.1.5
+EXIT:0
+
+[pip show openpyxl]
+Name: openpyxl
+Version: 3.1.5
+Location: C:\Users\kjell\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages
+
+[pip show pywin32]
+(ingen utdata — ikke installert)
+
+[python -c "import win32com.client; win32com.client.Dispatch('Excel.Application'); print('Excel COM OK')"]
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'win32com'
+EXIT:1
+
+[Standardstier LibreOffice sjekket]
+C:\Program Files\LibreOffice\program\soffice.exe            : False
+C:\Program Files (x86)\LibreOffice\program\soffice.exe      : False
+C:\Program Files\LibreOffice\program\soffice.com            : False
+C:\Program Files (x86)\LibreOffice\program\soffice.com      : False
+
+[Excel-installasjon sjekket]
+C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE : True
+C2R Platform: x64
+(Kilde: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\excel.exe +
+ HKLM\SOFTWARE\Microsoft\Office\ClickToRun\Configuration)

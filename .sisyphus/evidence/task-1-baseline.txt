@@ -1,0 +1,25 @@
+T1 — RÅ UTDRAG: generator + baseline (2026-09-07)
+=================================================
+
+[kjøring 1 — med eksempeldata]
+> python lag_supportsystem.py
+OK – Supportsystem.xlsx generert, med eksempeldata
+EXIT:0
+
+[kjøring 2 — tom variant]
+> python lag_supportsystem.py ren
+OK – Supportsystem.xlsx generert, tomt (uten eksempeldata)
+EXIT:0
+
+[kjøring 3 — med eksempeldata igjen; endelig tilstand = eksempeldata-variant]
+> python lag_supportsystem.py
+OK – Supportsystem.xlsx generert, med eksempeldata
+EXIT:0
+
+[SHA-256 av Supportsystem.xlsx (eksempeldata-variant)]
+> Get-FileHash -LiteralPath "Supportsystem.xlsx" -Algorithm SHA256
+E622CC538C86229AA2E218F9976C75D33EC5DACAE6F76C63C799B343D980853B
+
+[Zip-innhold — antall oppføringer]
+entries: 31
+(Sortert navneliste: se .sisyphus/evidence/baseline/filelist.txt)

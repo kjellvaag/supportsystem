@@ -1,0 +1,24 @@
+Scoring-orakel QA
+=================
+Dokument: {'title': 'Wi-Fi nede i møterom 2', 'keywords': 'wifi trådløs nettverk tilkobling accesspunkt internett', 'problem': 'Ingen kan koble til trådløsnettet i møterom 2. Accesspunktet blinker rødt.', 'solution': 'Restartet accesspunktet og oppdaterte firmware. Nettet er oppe igjen.'}
+
+score("wifi", doc) = 3
+score("wify", doc) = 7
+
+normalize("Wi-Fi") = "wi fi"
+levenshtein("wify", "wifi") = 1
+levenshtein("wify", "wi-fi") = 2
+
+Forklaring av score("wifi", doc) = 3:
+- "wifi" er IKKE delstreng av normalisert tittel "wi fi nede i moeterom 2" (mellomrom)
+- "wifi" ER delstreng av nøkkelord -> vekt 3
+- Ingen treff i problem/løsning
+=> total = 3
+
+Forklaring av score("wify", doc) = 7 (fuzzy-fallback):
+- Ingen delstreng-treff -> total = 0 -> fuzzy aktiveres
+- "wify" vs "wi" i tittel: levenshtein = 2 <= 2 -> vekt 4
+- "wify" vs "wifi" i nøkkelord: levenshtein = 1 <= 2 -> vekt 3
+=> total = 7
+
+OK – både eksakt og fuzzy gir positive scorer, og fuzzy-treff aktiveres for skrivefeilen "wify".

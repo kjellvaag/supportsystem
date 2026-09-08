@@ -1,0 +1,6 @@
+Innholdsstabilitets-sjekk: fallback vs git HEAD Supportsystem.xlsx
+Normalisering: docProps/core.xml + docProps/app.xml tidsstempler + TotalTime
+Original entries (HEAD): 31
+Ny entries: 31
+Ulikheter: 0
+OK – 0 ulikheter etter normalisering.

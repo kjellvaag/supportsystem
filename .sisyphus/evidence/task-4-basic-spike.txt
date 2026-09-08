@@ -1,0 +1,112 @@
+Task T4: Spike — Basic-injeksjon (proof of concept)
+Dato: 2026-09-07
+
+MÅL
+Bevise at en LibreOffice Basic-makro kan injiseres i en openpyxl-generert
+.xlsx som er konvertert til .ods, og at .ods-filen fortsatt er gyldig.
+
+MILJØ
+- Python 3.11.9, openpyxl 3.1.5
+- LibreOffice installert på C:\Program Files\LibreOffice\program\soffice.exe
+- Arbeidsmappe: C:\Users\kjell\AppData\Local\Temp\opencode\t4-spike
+
+STEG 1: Lag minimal .xlsx
+-------------------------
+from openpyxl import Workbook
+wb = Workbook(); ws = wb.active; ws.title = "Demo"
+ws["A1"] = "hello"; ws["A2"] = "world"
+wb.save("min.xlsx")
+
+Resultat: min.xlsx (4839 bytes)
+
+STEG 2: Konverter til .ods med soffice
+---------------------------------------
+& "C:\Program Files\LibreOffice\program\soffice.exe" `
+  --headless --convert-to ods --outdir . min.xlsx
+
+Resultat: min.ods (8987 bytes)
+
+STEG 3: Inspiser ren .ods
+-------------------------
+zip-namelist (relevant):
+  mimetype
+  manifest.rdf
+  Configurations2/
+  styles.xml
+  settings.xml
+  meta.xml
+  Thumbnails/thumbnail.png
+  content.xml
+  META-INF/manifest.xml
+
+Ingen Basic/-mappe finnes i en ren soffice-konvertert .ods.
+
+STEG 4: Injiser Basic-XML
+-------------------------
+Lagt til i .ods-zipen:
+  Basic/script-lc.xml
+  Basic/Standard/script-lb.xml
+  Basic/Standard/Module1.xml
+
+Module1.xml inneholder:
+  Sub Hello()
+      MsgBox "hei"
+  End Sub
+
+Patchet META-INF/manifest.xml med:
+  <manifest:file-entry manifest:full-path="Basic/" manifest:media-type="application/binary"/>
+  <manifest:file-entry manifest:full-path="Basic/script-lc.xml" manifest:media-type="text/xml"/>
+  <manifest:file-entry manifest:full-path="Basic/Standard/" manifest:media-type="application/binary"/>
+  <manifest:file-entry manifest:full-path="Basic/Standard/script-lb.xml" manifest:media-type="text/xml"/>
+  <manifest:file-entry manifest:full-path="Basic/Standard/Module1.xml" manifest:media-type="text/xml"/>
+
+Resultat: injected.ods (9415 bytes)
+
+STEG 5: Verifiser med soffice round-trip .ods -> .xlsx
+-------------------------------------------------------
+& "C:\Program Files\LibreOffice\program\soffice.exe" `
+  --headless --convert-to xlsx --outdir roundtrip injected.ods
+
+Resultat: roundtrip/injected.xlsx (5896 bytes)
+openpyxl bekrefter:
+  sheets: ['Demo']
+  A1 = 'hello'
+
+Konklusjon: LibreOffice aksepterer den injiserte .ods-filen uten reparasjon.
+
+STEG 6: Verifiser at makroen overlever ODS -> ODS
+--------------------------------------------------
+& "C:\Program Files\LibreOffice\program\soffice.exe" `
+  --headless --convert-to ods --outdir ods2ods injected.ods
+
+Etter konvertering finnes fortsatt:
+  Basic/Standard/Module1.xml
+  Basic/Standard/script-lb.xml
+  Basic/script-lc.xml
+
+Module1.xml er byte-identisk med den injiserte kilden.
+
+STEG 7: Test av gjenbrukbart injektor-skript
+---------------------------------------------
+python .sisyphus/evidence/spike/basic/injiser_basic.py `
+  .sisyphus/evidence/spike/basic/artifacts/min.ods `
+  .sisyphus/evidence/spike/basic/artifacts/test_injected.ods --verify
+
+Output:
+  Injisert Module1 i .sisyphus\evidence\spike\basic\artifacts\test_injected.ods
+  soffice round-trip OK: ark = ['Demo']
+
+Viktig lærdom
+-------------
+META-INF/manifest.xml MÅ patches med file-entry for hver Basic-del.
+Uten manifest-patching produserer soffice INGEN output ved
+headless-konvertering (tomt output-dir).
+
+Evidensfiler
+------------
+- .sisyphus/evidence/spike/basic/injiser_basic.py
+- .sisyphus/evidence/spike/basic/README.md
+- .sisyphus/evidence/spike/basic/artifacts/min.xlsx
+- .sisyphus/evidence/spike/basic/artifacts/min.ods
+- .sisyphus/evidence/spike/basic/artifacts/injected.ods
+- .sisyphus/evidence/spike/basic/artifacts/roundtrip/injected.xlsx

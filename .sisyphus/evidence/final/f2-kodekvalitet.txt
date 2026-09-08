@@ -1,0 +1,187 @@
+F2 KODEKVALITET – ENDELIG VERDIKT
+==================================
+Plan: supportsystem-macro-split
+Dato: 2026-09-07
+Reviewer: Sisyphus-Junior
+
+Build [PASS] | Tests [17/0] | Files [7 clean / 6 med issues] | VERDICT: APPROVE
+
+Oppsummering
+------------
+Alle tre bygg-targets (fallback .xlsx, excel .xlsm, calc .ods) genereres uten feil.
+Test-suiteen passerer med 17/17 tester. soffice-valideringen passerer begge round-trip.
+Koden er i hovedsak velstrukturert, norsk, og følger planens arkitektur.
+Det finnes noen mindre kvalitetsissues (hardkodede literaler, ubrukt import,
+korrupt tegn i testfil, manglende automatisk knappetilknytning i .ods), men ingen
+av dem er funksjonelle blokkerere. Verdikt: APPROVE med noterte forbedringspunkter.
+
+Byggkommandoer
+--------------
+  python lag_supportsystem.py              -> EXIT 0, Supportsystem.xlsx generert
+  python lag_supportsystem.py ren          -> EXIT 0, Supportsystem.xlsx generert (tomt)
+  python lag_supportsystem.py --target excel -> EXIT 0, Supportsystem.xlsm generert
+  python lag_supportsystem.py --target calc  -> EXIT 0, Supportsystem.ods generert
+  python lag_supportsystem.py --target excel ren -> EXIT 0, Supportsystem.xlsm generert (tomt)
+  python lag_supportsystem.py --target calc ren  -> EXIT 0, Supportsystem.ods generert (tomt)
+
+Test-suite
+----------
+  python -m pytest test_struktur.py -v     -> 17 passed, 0 failed, EXIT 0
+
+soffice-validering
+------------------
+  python valider_soffice.py                -> PASS (2/2 round-trip), EXIT 0
+  Merk: Første kjøring under parallell bygg-test rapporterte FAIL for ODS->XLSX
+  (utdatafil ikke produsert, exit 1). Ved isolert re-kjøring passerer begge
+  konverteringer. Dette indikerer en tidsingsfølsomhet/race rundt soffice-launcher
+  når flere prosesser berører filene samtidig, ikke en strukturell feil.
+
+Inspiserte filer og kvalitetsfunn
+----------------------------------
+
+build_common.py
+  Linje 15:   Ubrukt import: from openpyxl.worksheet.table import Table, TableStyleInfo
+              (ingen bruk av Table/TableStyleInfo i filen; AGENTS.md forbyr også ws.add_table)
+  Linje 331-336: Hardkodede DV-områder E2:E501, F2:F501, G2:G501, K2:K501, M2:M501, W2:W501
+              -> bør bruke kontrakt.MAX_S
+  Linje 347-349: Hardkodede dato-DV-områder B2:B501, P2:P501, Q2:Q501
+              -> bør bruke kontrakt.MAX_S
+  Linje 351-357: Hardkodede CF-områder M2:M501, G2:G501, R2:R501, S2:S501
+              -> bør bruke kontrakt.MAX_S
+  Linje 436-437: Hardkodede DV-områder C2:C301, J2:J301
+              -> bør bruke kontrakt.MAX_K
+  Linje 444:    Hardkodet dato-DV-område H2:H301
+              -> bør bruke kontrakt.MAX_K
+  Linje 484-485, 490: Hardkodede $L$2:$L$301 / $L$2:$L$301 i KB-søkeformler
+              -> bør bruke kontrakt.MAX_K
+  Linje 551-552, 557: Hardkodede $Y$2:$Y$501 i sakssøkeformler
+              -> bør bruke kontrakt.MAX_S
+  Linje 599, 605, 611: Hardkodede COUNTIFS-områder ...$2:$...$501
+              -> bør bruke kontrakt.MAX_S
+  Linje 625, 640, 655: Hardkodede diagram-ankre "A8", "F8", "F26"
+              -> bør bruke kontrakt.CHART_ANCHORS
+  Linje 662-664: Hardkodede separator-rader 7, 25, 33
+              -> delvis greit (layout), men kunne vært i kontrakt
+  Kommentar:   Flere av formel-strengene MÅ være literals pga. openpyxl/Excel,
+              men kapasitetsgrensene og ankrer kan/ bør sentraliseres ytterligere.
+              Dette er lav alvorlighet; endring av MAX_S/MAX_K ville kreve
+              mange manuelle oppdateringer i dag.
+
+kontrakt.py
+  OK: Sentraliserer MAX_S, MAX_K, N_KB, N_SAK, ark-rekkefølge, codeName,
+      headers, søkefelter, vekter, scorings-orakel og profiler.
+  Linje 68-74: Formlene i KPIS inneholder hardkodede 501/301, men dette ER
+      kontrakt-filen og er akseptabelt som frosset kontrakt.
+  Scorings-orakel matcher VBA/Basic-kildene; normalisering fjerner bindestrek
+      (rettet fra tidligere .replace("-", " ")-bug).
+
+lag_supportsystem.py
+  OK: Tynt skall som kaller build_common.build_skeleton(profile).
+  Linje 59-66: _BOKS_DEF inneholder magiske tall for avkryssingsboks-layout
+      (kol, rad, left_pt, top_pt, til_rad, roff, vml_rest). Dette er layout-data
+      tatt direkte fra Excel og er vanskelig å sentralisere, men bør dokumenteres
+      bedre (hva hver verdi betyr).
+  Linje 81:    "Løst"/"Lukket" hardkodet for avkryssingsbokser
+              -> bør indekseres fra build_common.statuser eller kontrakt
+  CLI:         Robust nok for planlagt bruk; ugyldig --target-verdi faller tilbake
+      til .xlsx uten feil (kunne gitt tydeligere feilmelding).
+  Feilmeldinger er norske.
+
+test_struktur.py
+  Linje 263:   Korrupt tegn i feilmelding: "enn\ufffd" (skal være "ennå").
+               Bytes i filen: EF BF BD (UTF-8 replacement character).
+               Påvirker ikke funksjonalitet, men er en kvalitetsfeil.
+  OK:          Tester dekker ark-rekkefølge, sirkulær formel, hjelpekolonner,
+               KPI-formler, definerte navn, datavalidering, diagrammer,
+               avkryssingsbokser, codeNames, VBA-binær, ODS-Basic-parts.
+  Merk:        Noen cellereferanser (B12, Y2, L2, A9, A8, AA5, AB5) er
+               hardkodet i testene; dette er akseptabelt for strukturelle asserts.
+
+backup.py
+  OK:          Generalisering av filendelse er korrekt:
+               - ekst = os.path.splitext(os.path.basename(kilde))[1]
+               - backupnavn bevarer endelsen
+               - roter() filtrerer på samme endelse
+  Ingen hardkodede .xlsx-referanser igjen (kun default config og kommentarer).
+  Feilmeldinger og logging er norske.
+
+backup_service.py
+  OK:          _svc_description_ er endelsesnøytral.
+  Ingen .xlsx-spesifikke referanser.
+
+valider_soffice.py
+  OK:          Sti overstyres via SOFFICE-miljøvariabel (ikke hardkodet).
+  Bruker temp-mappe; overskriver aldri kildefiler.
+  Merk:        Filnavnene Supportsystem.ods / Supportsystem.xlsx er hardkodet,
+               men dette er hensiktsmessig for et valideringsskript.
+
+vba/*.bas
+  ModFelles.bas:      Option Explicit, god kommentering, korrekt algoritme.
+  ModTidsstempel.bas: Option Explicit, robust EnableEvents-guard, god feilhåndtering.
+  ModSok.bas:         Option Explicit, FARG_TREFF = 10284031 (korrekt FFEB9C),
+                      debounce via Application.OnTime, array-basert lesing.
+  ModDashboard.bas:   Option Explicit, diagrammene flyttes ikke, kun dataserier.
+  Ingen TODO/FIXME funnet.
+  VBA-kildene er Windows-1252/Latin-1 (dokumentert; Excel importerer OK).
+
+basic/*.bas
+  ModFelles.bas:      Korrekt algoritme, Normaliser fjerner bindestrek.
+  ModTidsstempel.bas: Knapp-triggeret, bruker getDataArray().
+  ModSok.bas:         Knapp-triggeret, FARG_TREFF = 16771996 (korrekt FFEB9C i UNO),
+                      getDataArray-basert, kopierer datoformat fra referanseceller.
+  ModDashboard.bas:   Skriver kun hjelpetabeller, ingen UNO-diagram-API.
+  Ingen Option Explicit (bevisst utelatt under headless-forfatting;
+  README.md dokumenterer at det bør vurderes slått på etter kompilering).
+  Ingen TODO/FIXME funnet.
+  Noe duplisert logikk mellom VBA- og Basic-versjoner, men dette er
+  uunngåelig pga. to inkompatible makrodialekter.
+
+Kjente åpne tråder (vurdert)
+-----------------------------
+1. VBA-trefffarge-konstant (15652731 vs 10284031)
+   STATUS: RETTET I KILDE.
+   vba/ModSok.bas linje 25 har nå: Private Const FARG_TREFF As Long = 10284031
+   (kommentar: RGB(255, 235, 156)). basic/ModSok.bas bruker 16771996, som er
+   korrekt UNO/StarBasic-verdi for samme farge.
+   MERK: vba/vbaProject.bin er en ekstrahert binær; den faktiske fargen i
+   .xlsm avhenger av at donor er gjenbygget etter kilden ble rettet. Kildekoden
+   er korrekt, men binæren er ikke verifisert byte-nivå i denne reviewen.
+
+2. Manglende automatisk knappetilknytning i .ods
+   STATUS: ÅPEN, DOKUMENTERT.
+   Supportsystem.ods inneholder Basic-moduler (Module1-4.xml) og manifest-entries,
+   men content.xml har <office:scripts/> uten hendelser, og det finnes ingen
+   <form:button>-kontroller eller script:event-tilknytninger. Søk, tidsstempel
+   og dashboard er derfor knapp-triggeret og må knyttes manuelt i Calc (dokumentert
+   i basic/README.md og README.md). Dette følger planens design for LibreOffice/
+   OpenOffice (ingen Worksheet_Change), men det er en reell brukeropplevelsesbegrensning.
+
+AI-slop-vurdering
+-----------------
+  - Overkommentering: Nei. Kommentarene er informative og forklarer valg
+    (kontrakt-krav, encoding, UNO-vs-VBA-forskjeller).
+  - Generiske navn: Noen korte navn (cf, add_dv, skriv_blokk), men de er
+    konvensjonelle og forståelige i kontekst.
+  - Overabstraksjon: Nei. build_common.py er stor, men funksjonene speiler
+    arkitekturen (skjelett, avkryssingsbokser, Basic-injeksjon, VBA-injeksjon).
+  - Duplisering: Forventet og akseptabelt mellom VBA og Basic. Ingen
+    tydelig unødvendig duplisering i Python-koden.
+
+Anbefalte oppstramminger (ikke blokkerende)
+--------------------------------------------
+  1. Fjern ubrukt import Table/TableStyleInfo i build_common.py:15.
+  2. Erstatt hardkodede 501/301/8/26/33 etc. i build_common.py med
+     kontrakt-konstanter der det er praktisk mulig (særlig DV/CF-områder
+     og diagram-ankre).
+  3. Rett korrupt tegn i test_struktur.py:263 ("ennå").
+  4. Dokumenter _BOKS_DEF-magiske tall bedre, eller hent fra kontrakt.
+  5. Gjenbygg vba/vbaProject.bin etter FARG_TREFF-retting og verifiser
+     fargen i Excel (hvis ikke allerede gjort).
+  6. Vurder å legge til tydelig feilmelding for ugyldig --target-verdi.
+
+ENDELIG VERDIKT: APPROVE
+------------------------
+Kodekvaliteten er god nok for leveranse. Ingen funksjonelle feil, alle bygg og
+alle tester passerer. De noterte issues er mindre og dokumenterte. Den åpne
+.tråden om .ods-knappetilknytning er en kjent, dokumentert begrensning som
+følger planens design, ikke en uventet defekt.

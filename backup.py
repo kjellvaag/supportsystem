@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Backup-rutine for Supportsystem.xlsx.
+Backup-rutine for Supportsystem-filen (.xlsx/.xlsm/.ods).
 
 Kopierer Excel-filen til en lokal backupmappe og valgfritt en nettverksdisk,
 med tidsstempel i filnavnet. Beholder de N nyeste kopiene per mappe og
@@ -25,6 +25,9 @@ MAPPE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FIL = os.path.join(MAPPE, "backup_config.json")
 
 STANDARD_CONFIG = {
+    # Standard kildefil er Supportsystem.xlsx. Kan også peke på Supportsystem.xlsm
+    # (makro) eller Supportsystem.ods (LibreOffice/OpenOffice) – backupen bevarer
+    # alltid kildefilens egen endelse.
     "kildefil": "Supportsystem.xlsx",
     "lokal_backupmappe": "backups",
     "nettverk_backupmappe": "",          # f.eks. "\\\\server\\felles\\backup" – tom = deaktivert
@@ -73,7 +76,8 @@ def kjor_backup(cfg):
 
     stempel = datetime.now().strftime("%Y%m%d_%H%M%S")
     navn_grunn = os.path.splitext(os.path.basename(kilde))[0]
-    backupnavn = f"{navn_grunn}_{stempel}.xlsx"
+    ekst = os.path.splitext(os.path.basename(kilde))[1]  # .xlsx / .xlsm / .ods
+    backupnavn = f"{navn_grunn}_{stempel}{ekst}"
 
     mal = [absolutt(cfg["lokal_backupmappe"])]
     if cfg.get("nettverk_backupmappe"):
@@ -89,16 +93,21 @@ def kjor_backup(cfg):
             minst_en_ok = True
         except OSError as e:
             logg(f"FEIL ved backup til {mappe}: {e}", cfg)
-        roter(mappe, navn_grunn, int(cfg["behold_antall"]), cfg)
+        roter(mappe, navn_grunn, int(cfg["behold_antall"]), cfg, ekst)
     return minst_en_ok
 
 
-def roter(mappe, navn_grunn, behold, cfg):
-    """Sletter eldste kopier slik at kun 'behold' nyeste gjenstår."""
+def roter(mappe, navn_grunn, behold, cfg, ekst):
+    """Sletter eldste kopier slik at kun 'behold' nyeste gjenstår.
+
+    'ekst' er kildefilens endelse (f.eks. ".xlsm") – kun kopier med samme
+    endelse roteres, så .xlsx- og .xlsm-backuper ikke blandes.
+    """
     try:
         kopier = sorted(
             (f for f in os.listdir(mappe)
-             if f.startswith(navn_grunn + "_") and f.endswith(".xlsx")),
+             if f.startswith(navn_grunn + "_")
+             and os.path.splitext(f)[1].lower() == ekst.lower()),
             key=lambda f: os.path.getmtime(os.path.join(mappe, f)),
         )
     except OSError:

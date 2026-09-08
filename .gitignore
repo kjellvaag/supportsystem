@@ -13,3 +13,17 @@ backups/
 # IDE
 .vscode/
 .idea/
+
+# Sisyphus-arbeidsstilstand: plans/notepads/evidence-tekst committes, men
+# kjøretids-tilstand og midlertidige bygge-artefakter skal ikke inn.
+.sisyphus/boulder.json
+.sisyphus/evidence/.sisyphus/
+.sisyphus/evidence/baseline/
+.sisyphus/evidence/final-qa/*.xlsx
+.sisyphus/evidence/final-qa/*.ods
+.sisyphus/evidence/final-qa/ods_conv/
+.sisyphus/evidence/spike/*/*.xlsx
+.sisyphus/evidence/spike/*/*.xlsm
+.sisyphus/evidence/spike/*/*.ods
+.sisyphus/evidence/spike/*/*.bin
+.sisyphus/evidence/spike/*/artifacts/

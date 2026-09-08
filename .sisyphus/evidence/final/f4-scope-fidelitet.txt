@@ -1,0 +1,184 @@
+================================================================================
+F4 — SCOPE-FIDELITET (review)
+Plan: .sisyphus/plans/supportsystem-macro-split.md
+Dato: 2026-09-07
+================================================================================
+
+SAMMENDRAG
+Tasks [14/15 compliant, 1 partial] | Contamination [CLEAN] | Unaccounted [CLEAN/0 kildefiler (2 sporede artefakter)] | VERDICT: APPROVE
+
+Metode: planens «What to do»/«Acceptance Criteria»/«Must NOT do» for T1–T15
+sammenholdt 1:1 mot faktisk kilde (lag_supportsystem.py, build_common.py,
+kontrakt.py, vba/*.bas, basic/*.bas, backup.py, backup_service.py,
+test_struktur.py, valider_soffice.py) og git-status/diff. Ingen filer endret.
+
+================================================================================
+PER-OPPGAVE
+================================================================================
+
+T1 — Miljøvalidering + baseline            [COMPLIANT]
+  - Evidence finnes: baseline/{miljoe.txt,sha256.txt,filelist.txt} +
+    task-1-{miljoe,baseline}.txt. Generator kjørt (exit 0). Must NOT (ingen
+    endring av lag_supportsystem.py) overholdt.
+  - Merk (ikke scope-brudd): T1 konkluderte «soffice mangler helt»; T4 fant
+    den senere på C:\Program Files\LibreOffice\program\soffice.exe (ikke PATH).
+    Faktarelatert presisering, ikke avvik.
+
+T2 — Trekk ut build_common.py               [COMPLIANT]
+  - build_common.py (1085 linjer) med build_skeleton(profile) +
+    injiser_avkryssingsbokser; lag_supportsystem.py = tynt skall (125 linjer).
+  - Sirkulær referanse (B) og hjelpekolonner Y/L beholdt KUN i formula-profil
+    (build_common.py:229-231, 241-247, 378-383). wb.calculation.iterate bevart
+    (build_common.py:158-164). COUNTIFS tester C (Innmelder), ikke B.
+  - Must NOT overholdt: ingen add_table/M365/ManualLayout; fallback innholds-
+    stabil (0 ulikheter vs git HEAD, jf. learnings T2/T5/T8/T11).
+
+T3 — Spike VBA-injeksjon                   [COMPLIANT]
+  - Evidence spike/vba/* + task-3-vba-spike.txt. Donor via COM, ekstraksjon av
+    vbaProject.bin, Content_Types/rels-patching. Kun PoC (ikke full VBA) — OK.
+
+T4 — Spike Basic-injeksjon                 [COMPLIANT]
+  - Evidence spike/basic/* + task-4-basic-spike.txt. Injecter Basic-XML +
+    manifest-patching (påkrevd). Kun PoC — OK.
+
+T5 — Frys kontrakt.py                       [PARTIAL — se avvik]
+  - kontrakt.py eksisterer og eksporterer MAX_S/MAX_K, SHEETS, CODE_NAMES,
+    SAKER_HEADERS/KB_HEADERS, KPIS, CHART_*, SOK_*, FELT_VEKTER, normalize(),
+    levenshtein(), score(), FALLBACK/EXCEL/CALC_PROFILE. codeName settes
+    betinget (set_codename). Orakel verifisert (wifi=4, wify>0). KOMPLITT på
+    alle punkter UNNTATT «Ikke la magiske tall overleve utenfor kontrakt.py».
+  - AVVIK (T5 Must-NOT-do delvis brutt): hardkodede 501/301-literaler i
+    build_common.py sine DV/CF/formel-OMRÅDER (ikke kontrakt.MAX_S/MAX_K):
+      * build_common.py:331-336  add_dv "E2:E501".."W2:W501"
+      * build_common.py:347-349  dv_date.add("B2:B501"/"P2:P501"/"Q2:Q501")
+      * build_common.py:351-361  cf("M2:M501","G2:G501", f"{col}2:{col}501")
+      * build_common.py:436-444  add_dv "C2:C301"/"J2:J301", dv_kbd "H2:H301"
+      * build_common.py:484,490  KB-søkformel $L$2:$L$301
+      * build_common.py:551,557  Sakssøkformel $Y$2:$Y$501
+      * build_common.py:599,605,611  Dashboard COUNTIFS $M$2:$M$501 m.fl.
+    Loop-grensene bruker kontrakt.MAX_S/MAX_K (226, 374), men disse OMRÅDE-
+    strengene er ikke parametrisert. Verdiene er KORREKTE og konsistente
+    (ingen funksjonell feil), men kapasitetsendring vil ikke forplante seg
+    automatisk til DV/CF/formler. Lav alvorlighetsgrad.
+
+T6 — Forfatt VBA-kilde (.bas)              [COMPLIANT]
+  - vba/{ModFelles,ModTidsstempel,ModSok,ModDashboard}.bas finnes, alle med
+    Option Explicit + norske kommentarer. ScoreDok matcher kontrakt.score
+    (tittel=4/nøkkelord=3/problem=2/løsning=1, fuzzy ≤2). Celleadresser er
+    hardkodet i .bas MEN med kommentar-referanse til kontrakt.py
+    («vedlikeholdes manuelt synkronisert») — i tråd med planens formulering.
+  - Must NOT overholdt: diagrammer flyttes aldri (kun series-rebuild);
+    ingen M365-spesifikke VBA-anrop; OnTime-debounce + EnableEvents-guard.
+
+T7 — Donor .xlsm + vbaProject.bin           [COMPLIANT]
+  - vba/build_donor.py (gjenbrukbart, COM/pywin32, AccessVBOM=1), vba/README.md
+    (gjenoppbyggingsprosedyre), vba/vbaProject.bin (82 944 bytes). donor.xlsm
+    git-ignoret (.gitignore:3). Must NOT overholdt (donor ikke committet,
+    ingen logikkendring).
+
+T8 — --target excel                        [COMPLIANT]
+  - lag_supportsystem.py:44-46 + injiser_vba_prosjekt (build_common.py:1041-1085)
+    patcher [Content_Types].xml (macroEnabled + vbaProject-override) og
+    workbook.xml.rels. Excel-profil: B tom (ingen sirkel), Y/L tomme, ingen
+    INDEX/MATCH i resultatrader; wb.calculation.iterate IKKE påkrevd i
+    excel-profil (build_common.py:165-169). Must NOT overholdt (fallback-bane
+    urørt).
+
+T9 — Excel README + makrosikkerhet         [COMPLIANT]
+  - README.md har «### Excel (.xlsm) med makroer» + «#### Slik aktiverer du
+    makroer i Excel» (Unblock, Trust Center, klarerte plasseringer).
+    Eksisterende fallback-dokumentasjon urørt.
+
+T10 — Forfatt Basic-makroer (tekst)        [COMPLIANT]
+  - basic/{ModFelles,ModTidsstempel,ModSok,ModDashboard}.bas + basic/README.md.
+    ScoreDok matcher kontrakt.score. Knapp-triggeret design + best-effort
+    listener kun som kommentar. Must NOT overholdt (ingen GUI-event-antagelse;
+    diagrammer flyttes aldri).
+
+T11 — --target calc                         [COMPLIANT]
+  - lag_supportsystem.py:84-117: skjelett → soffice → injiser Basic
+    (build_common.injiser_basic) + manifest-patching. Sjekker SOFFICE med
+    klar feilmelding. Must NOT overholdt (.xlsx-skjelettkode beholdt).
+  - Mindre note (ikke scope-brudd): soffice-sti er hardkodet som default-
+    konstant (r"C:\Program Files\LibreOffice\program\soffice.exe",
+    lag_supportsystem.py:30), overstyrbar via SOFFICE-miljøvariabel — ikke
+    «soffice fra PATH» slik planen ordrett sier. Overstyrbar + tydelig
+    feilmelding, lav alvorlighetsgrad.
+
+T12 — LO/OO README + makrosikkerhet        [COMPLIANT]
+  - README.md har «### LibreOffice og OpenOffice (.ods) med makroer» +
+    «#### Slik aktiverer du makroer i LibreOffice og OpenOffice». Fallback-/
+    Excel-seksjoner urørt.
+
+T13 — Generaliser backup.py                [COMPLIANT]
+  - backup.py:79-80 bevarer kildefilendelse; roter(..., ekst) filtrerer på
+    endelse (108-111); STANDARD_CONFIG-kommentar (28-30); backup_service.py
+    endelsesnøytral beskrivelse (34-38). Ingen multi-fil-orkestrering.
+
+T14 — test_struktur.py                     [COMPLIANT]
+  - 17 tester (xlsx/xlsm/ods, strukturelt; ingen makro-kjøring). .ods-test
+    un-skippet i T11. Must NOT (ikke test makro-kjøring) overholdt.
+
+T15 — valider_soffice.py                   [COMPLIANT]
+  - .ods→.xlsx og .xlsx→.ods headless, exit 0-sjekk, tempfile.mkdtemp()
+    (kildefiler overskrives aldri). SOFFICE-miljøvariabel.
+
+================================================================================
+KRYSS-KONTAMINERING
+================================================================================
+- CLEAN. Fallback er innholds-stabil (identiske zip-oppføringer, kun
+  docProps-tidsstempler avviker; Supportsystem.xlsx diff = 115965→115965 bytes).
+- Divergens er profil-betinget (timestamp_mechanism / search_mechanism /
+  set_codename) — ingen excel/calc-spesifikk logikk lekkasjerer inn i
+  fallback-banen. VBA-trefffarge-fiksen (se under) berører kun excel-target.
+
+================================================================================
+URAPPORTERTE ENDRINGER
+================================================================================
+- CLEAN for kildefiler. Alle nye/endrede kildefiler er dekket av oppgavenes
+  «Files»-lister: build_common.py (T2), kontrakt.py (T5), lag_supportsystem.py
+  (T2/T8/T11), vba/*.bas (T6), vba/{build_donor.py,README.md,vbaProject.bin}
+  (T7), basic/* (T10), backup.py/backup_service.py (T13), test_struktur.py
+  (T14), valider_soffice.py (T15), README.md (T9/T12), Supportsystem.xlsm/
+  .ods (T8/T11-utdata).
+- 2 sporede ARtefakter endret som forventet sideeffekt (ikke scope):
+  * __pycache__/backup.cpython-311.pyc — bygge-artefakt; ble committet i
+    «Initial commit» og ignoreres ikke lenger fordi filen allerede er sporet.
+  * backups/backup.log — logg fra T13/F3-kjøringer.
+  Ingen av dem er kildeendringer.
+
+================================================================================
+DE TO KJENTE ÅPNE TRÅDENE — VURDERING
+================================================================================
+1) VBA-trefffarge-konstant (FARG_TREFF):
+   INNENFOR scope. Planen krever trefford-markering (helcelle-formatering);
+   fargeverdien er en implementasjonsdetalj. Learnings-notatet (KORREKSJON 2)
+   flagget 15652731 som feil (lyseblå); vba/ModSok.bas:25 har nå KORREKT
+   10284031 (=RGB(255,235,156)=FFEB9C), og vbaProject.bin er gjenbygd
+   (M i git-status). basic/ModSok.bas:27 bruker 16771996 (=FFEB9C, korrekt
+   StarBasic-format). Tråden er dermed LUKKET, innenfor scope.
+
+2) Manglende automatisk knappetilknytning i .ods:
+   INNENFOR scope. Planen spesifiserer knapp-triggeret søk (T10/T11/T12) og
+   T11 «Sett event-binding der det er mulig headless (ELLER dokumentér at
+   knapp-triggeret brukes)». Implementasjonen leverer Basic-modulene uten
+   <office:scripts/>-binding; knappetilordning dokumentert som manuell
+   Calc-UI-handling (basic/README.md «Knappetilordning», README.md «Slik
+   aktiverer du makroer…»). D4-knappCELLENE («SØK I KB →» / «SØK I SAKER →»)
+   fantes allerede i original fallback (bekreftet via git show HEAD) — ingen
+   scope-creep. Automatisk binding er ikke spesifisert i planen → ikke et avvik.
+
+================================================================================
+VERDICT
+================================================================================
+APPROVE — alle 15 oppgaver levert i henhold til planen; ingen scope-creep,
+ingen kryss-kontaminering, ingen urapporterte kildefiler.
+
+Forbehold (lav alvorlighetsgrad, ikke blokkerende):
+  * T5 PARTIAL: 501/301-literaler gjenstår i build_common.py sine DV/CF/
+    formel-områder (se fil:linje over) — sentralisering i kontrakt.py er ikke
+    fullstendig. Verdiene er korrekte; kun vedlikeholdsrisiko.
+  * T11: soffice-sti hardkodet som default (overstyrbar SOFFICE) i stedet for
+    PATH-oppslag.
+  * Hygiene: ubrukt import `Table, TableStyleInfo` i build_common.py:15 (ingen
+    add_table benyttes — korrekt — men importen er død).

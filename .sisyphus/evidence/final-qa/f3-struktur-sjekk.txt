@@ -1,0 +1,65 @@
+=== FORBEREDELSE: ren tilstand for alle tre targets ===
+
+=== SCENARIO 1: Fallback .xlsx ===
+Ark-rekkefolge: ['Dashboard', 'Saker', 'Søk KB', 'Søk saker', 'Kunnskapsbase', 'Oppsett', 'Instruksjoner'] -> OK
+codeName (fallback skal vaere None): {'Dashboard': None, 'Saker': None, 'Søk KB': None, 'Søk saker': None, 'Kunnskapsbase': None, 'Oppsett': None, 'Instruksjoner': None} -> OK
+Saker!B2 sirkulaer formel: '=IF($C2&$H2="","",IF($B2="",NOW(),$B2))' -> OK
+Hjelpekolonner Saker!Y2 har formel: True, KB!L2 har formel: True -> OK
+Ren modus: saker=0, KB=0 -> OK
+SCENARIO 1 RESULTAT: PASS
+
+=== SCENARIO 2: Excel .xlsm ===
+vbaProject.bin finnes: True -> OK
+[Content_Types].xml macroEnabled+vbaProject: True -> OK
+codeName mapping: {'Dashboard': 'Sheet1', 'Saker': 'Sheet2', 'Søk KB': 'Sheet3', 'Søk saker': 'Sheet4', 'Kunnskapsbase': 'Sheet5', 'Oppsett': 'Sheet6', 'Instruksjoner': 'Sheet7'} -> OK
+Saker!B2 ikke formel: None -> OK
+Ren .xlsm: saker=0, KB=0 -> OK
+SCENARIO 2 RESULTAT: PASS
+
+=== SCENARIO 3: Calc .ods ===
+Basic-moduler tilstede: {'Basic/script-lc.xml': True, 'Basic/Standard/script-lb.xml': True, 'Basic/Standard/Module1.xml': True, 'Basic/Standard/Module2.xml': True, 'Basic/Standard/Module3.xml': True, 'Basic/Standard/Module4.xml': True} -> OK
+Manifest-entries for Basic: True -> OK
+SCENARIO 3 RESULTAT: PASS
+
+=== SCENARIO 4: Backup endelsesbevaring ===
+Backup .xlsm: 2 fil(er), nyeste=Supportsystem_20260907_235834.xlsm -> OK
+Backup .ods: 2 fil(er), nyeste=Supportsystem_20260907_235834.ods -> OK
+backup_config.json gjenopprettet
+SCENARIO 4 RESULTAT: PASS
+
+=== SCENARIO 5: Edge-cases ===
+Genererer sample-data-varianter for norske tegn-sjekk...
+Norske tegn overlever .xlsx: True, .xlsm: True
+Norske tegn overlever .ods (etter soffice-konvertering): True
+kontrakt.normalize('Wi-Fi nede') == 'wifi nede': True
+VBA fjerner bindestrek (Replace(...,"-","")): True
+Basic fjerner bindestrek (Replace(...,"-","")): True
+Dynamiske navn for voksende lister: True (fantes: ['Ansatte', 'Kategorier', 'Prioriteter', 'Statuser', 'Kanaler', 'KategoriMatrise', 'SLAMatrise'])
+SCENARIO 5 RESULTAT: PASS
+
+=== SCENARIO 6: Kryss-integrasjon ===
+Slettet eksisterende Supportsystem.*
+Generer xlsx: exit=0
+Generer xlsm: exit=0
+Generer ods: exit=0
+Alle tre filer eksisterer: {'Supportsystem.xlsx': True, 'Supportsystem.xlsm': True, 'Supportsystem.ods': True}
+SCENARIO 6 RESULTAT: PASS
+
+=== SCENARIO 7: Automatiske valideringer ===
+Leter etter evidensfiler: .sisyphus\evidence\final-qa\pytest-output.txt, .sisyphus\evidence\final-qa\soffice-output.txt
+pytest-output.txt har '17 passed': True
+test_struktur.py 17 passed: True
+soffice-output.txt har PASS: True
+valider_soffice.py PASS: True
+
+============================================================
+OPPSUMMERING: Scenarios 8/8 PASS
+  1 fallback .xlsx : PASS
+  2 Excel .xlsm    : PASS
+  3 Calc .ods      : PASS
+  4 Backup         : PASS
+  5 Edge-cases     : PASS
+  6 Kryss-integr.  : PASS
+  7 test_struktur  : PASS
+  8 valider_soffice: PASS
+============================================================

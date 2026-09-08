@@ -49,9 +49,9 @@ Endelig codeName-map:
   'Instruksjoner' -> Sheet7
 Donor lagret: C:\Users\kjell\projects\supportsystem-oc1\vba\donor.xlsm
 Excel avsluttet
-Ekstraherte xl/vbaProject.bin -> C:\Users\kjell\projects\supportsystem-oc1\vba\vbaProject.bin (82944 bytes)
+Ekstraherte xl/vbaProject.bin -> C:\Users\kjell\projects\supportsystem-oc1\vba\vbaProject.bin (88576 bytes)
 openpyxl keep_vba: xl/vbaProject.bin tilstede = True
-C:\Users\kjell\projects\supportsystem-oc1\vba\vbaProject.bin størrelse = 82944 bytes
+C:\Users\kjell\projects\supportsystem-oc1\vba\vbaProject.bin størrelse = 88576 bytes
 Excel COM komponenter: ['ModDashboard', 'ModFelles', 'ModSok', 'ModTidsstempel']
 Sheet2 har Worksheet_Change
 Sheet3 har Worksheet_Change

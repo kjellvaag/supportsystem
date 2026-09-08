@@ -1,0 +1,24 @@
+Fuzzy scoring-test
+==================
+score("wifi", doc)  = 3 (forventet > 0)
+score("wify", doc)  = 7 (forventet > 0 via fuzzy)
+
+Dokument:
+  title:    "Wi-Fi nede i møterom 2"
+  keywords: "wifi trådløs nettverk tilkobling accesspunkt internett"
+  problem:  "Ingen kan koble til trådløsnettet i møterom 2. Accesspunktet blinker rødt."
+  solution: "Restartet accesspunktet og oppdaterte firmware. Nettet er oppe igjen."
+
+Eksakt-delstreng-sjekk for "wifi":
+  title    normalisert: "wi fi nede i moeterom 2" -> inneholder "wifi": NEI
+  keywords normalisert: "wifi trådløs nettverk tilkobling accesspunkt internett" -> inneholder "wifi": JA (vekt 3)
+  problem  normalisert: "ingen kan koble til trådløsnettet i moeterom 2 ..." -> inneholder "wifi": NEI
+  solution normalisert: "restartet accesspunktet ..." -> inneholder "wifi": NEI
+=> score("wifi", doc) = 3
+
+Fuzzy-fallback for "wify" (ingen delstreng-treff):
+  levenshtein("wify", "wi")   = 2 <= 2  -> title-treff    (vekt 4)
+  levenshtein("wify", "wifi") = 1 <= 2  -> keywords-treff (vekt 3)
+=> score("wify", doc) = 7
+
+OK – fuzzy-orakelet gir treff på skrivefeilen "wify" mot "Wi-Fi" / "wifi".

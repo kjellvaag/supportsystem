@@ -1,0 +1,7 @@
+Konverterer Supportsystem.ods -> Supportsystem.xlsx ...
+  PASS: OK (exit 0, 113234 bytes)
+Konverterer Supportsystem.xlsx -> Supportsystem.ods ...
+  PASS: OK (exit 0, 125237 bytes)
+
+OPPSUMMERING: PASS (alle 2 round-trip-konverteringer lyktes)
+EXITCODE=0

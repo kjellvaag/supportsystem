@@ -1,0 +1,89 @@
+F1 - PLAN-OVERHOLDELSE (oracle-review)
+Dato: 2026-09-07
+Plan: .sisyphus/plans/supportsystem-macro-split.md
+
+============================================================
+VERDIKT: APPROVE (med to ikke-blokkerende oppfoelgingspunkter)
+============================================================
+
+Must Have [4/4] | Must NOT Have [5/5] | Tasks [15/15] | Evidence [14/15]
+
+----- MUST HAVE (4/4) -----
+1. Felles kjerne innholds-stabil for fallback - OK
+   Verifisert: innholds-sammenligning mot git HEAD Supportsytem.xlsx
+   (115965 bytes). 31 zip-oppforinger i begge, 0 ulikheter etter
+   normalisering av docProps-tidsstempler.
+2. Sok med rangering, fuzzy og trefford-markering i begge makroversjoner - OK
+   VBA: vba/ModSok.bas (ScoreDok via ModFelles, MarkerTreff helcelle);
+   Basic: basic/ModSok.bas (SokKB/SokSaker + MarkerTreff).
+   Orakel: kontrakt.score (tittel=4, nokkelord=3, problem=2, losning=1,
+   fuzzy Levenshtein <= 2). NB: se betingelse 1 (knappetilordning i .ods).
+3. Dashboard bygger om dataserier + resizer diagrammer - OK
+   VBA: vba/ModDashboard.bas (OppdaterDashboard).
+   Basic: basic/ModDashboard.bas (skriver hjelpetabeller; levende
+   Calc-diagrammer). Ingen vilkaarlig flytting noe sted.
+4. README med makro-sikkerhetsveiledning for begge maal - OK
+   README.md: "### Excel (.xlsm) - makroer" + aktiveringssteg; 
+   "### LibreOffice og OpenOffice (.ods)" + aktiveringssteg.
+
+----- MUST NOT HAVE (5/5) -----
+1. Sirkulaer referanse + "ikke test kolonne B" beholdt i delt kjerne - OK
+   build_common.py:230 (formel i B, kun timestamp_mechanism="formula");
+   KPI-COUNTIFS tester kolonne C (kontrakt.py:68-74), aldri B.
+2. Ingen vilkaarlig flytting av diagramobjekter - OK (kun rebuild/resize).
+3. LO-tracken blokkerte ikke Excel-tracken - OK (T7/T8 ferdig; T11 ferdig).
+4. Ingen nye ark/KPI-er/data-funksjoner - OK (7 ark, 6 KPI-er som original).
+5. Ingen M365-funksjoner / add_table / ManualLayout - OK
+   grep (FILTER|HSTACK|XLOOKUP|add_table|ManualLayout|XMATCH|LET(|LAMBDA)
+   over *.py og *.bas: 0 treff.
+
+----- TASKS (15/15) -----
+Alle 15 TODOs merket [x]; alle leveranser finnes:
+build_common.py, kontrakt.py, Supportsytem.xlsx/.xlsm/.ods, test_struktur.py,
+valider_soffice.py, backup.py (endelsesnoytral), vba/*.bas + vbaProject.bin,
+basic/*.bas + basic/README.md, vba/README.md.
+
+----- EVIDENCE (14/15) -----
+MANGLER: .sisyphus/evidence/task-2-byte-stabil.txt (T2-kravet).
+Alle andre oppgaver har minst en evidence-fil. T2s faktiske utfall
+(innholds-stabil fallback) er uavhengig gjenverifisert i denne reviewen
+(0 ulikheter), saa gapet er dokumentasjonsmessig, ikke funksjonelt.
+Sekundaert: task-6-tidsstempel.txt mangler ogsaa (kun task-6-score.txt
+finnes), men T6 har dermed fortsatt evidence-dekning.
+
+----- DEFINITION OF DONE (5/5) -----
+1. .xlsx aapner rent + innholds-stabil - OK (valider_soffice PASS; 0 ulikheter).
+2. .xlsm har vbaProject.bin + makroer - OK (test_xlsm_vba_project_present PASS;
+   vbaProject.bin 82944 bytes; codeName verifisert; spike-verifisert i T3/T7/T8).
+3. .ods har Basic-moduler + aapner rent - OK (test_ods_calc_macro_parts PASS;
+   valider_soffice ods->xlsx PASS).
+4. test_struktur.py alle passerer - OK (17 passed, 0 failed).
+5. backup.py med .xlsm/.ods - OK (T13: endelse bevart + rotasjon per endelse).
+
+----- AUTOMATISK VERIFIKASJON (denne reviewen) -----
+python lag_supportsystem.py                    -> exit 0
+python lag_supportsystem.py --target excel     -> exit 0
+python lag_supportsystem.py --target calc      -> exit 0
+python -m pytest test_struktur.py -v           -> 17 passed, 0 failed
+python valider_soffice.py                      -> PASS (begge round-trips)
+
+----- BETINGELSER / AAPNE TRAADER (ikke blokkerende) -----
+1. .ods knappetilordning er IKKE automatisert: Supportsytem.ods inneholder
+   Basic-modulene (Module1..4.xml) men INGEN makro-tilknyttede knapper
+   (content.xml har verken office:scripts, script:event-listener eller
+   form:button). Sok/tidsstempel/dashboard i .ods krever manuell
+   knappetilordning (dokumentert i basic/README.md "Knappetilordning").
+   Hoved-README.md beskriver .ods-sok som "knapp-triggeret" uten aa si at
+   knappen maa opprettes manuelt - README-verifiseringssteget (klikk
+   "SOK I KB") stemmer ikke med faktisk fil. Planens DoD for calc er
+   likevel oppfylt ("Basic-moduler + aapner rent"). Anbefaling: auto-bind
+   knapper i T11-pipeline, ELLER presiser README om manuell oppretting.
+2. Manglende task-2-evidence-fil (dokumentasjonsgap, se over).
+3. OBS (ikke lenger aapen): VBA-trefffarge er KORRIGERT. vba/ModSok.bas:25
+   har FARG_TREFF = 10284031 (RGB(255,235,156)=FFEB9C), og vba/vbaProject.bin
+   inneholder 10284031 (bytes FF EB 9C 00), IKKE den gamle feilen 15652731.
+
+----- KONKLUSJON -----
+Implementasjonen oppfyller planens Definition of Done, alle Must Have og alle
+Must NOT Have. VERDIKT: APPROVE, med to ikke-blokkerende oppfoelgingspunkter
+(.ods knappetilordning + task-2-evidence).

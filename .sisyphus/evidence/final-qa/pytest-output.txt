@@ -1,0 +1,26 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\kjell\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\kjell\projects\supportsystem-oc1
+plugins: anyio-4.15.1
+collecting ... collected 17 items
+
+test_struktur.py::test_xlsx_sheets_order PASSED                          [  5%]
+test_struktur.py::test_xlsx_saker_b2_circular_formula PASSED             [ 11%]
+test_struktur.py::test_xlsx_helper_columns_have_formulas PASSED          [ 17%]
+test_struktur.py::test_xlsx_dashboard_kpi_formulas PASSED                [ 23%]
+test_struktur.py::test_xlsx_defined_names_exist PASSED                   [ 29%]
+test_struktur.py::test_xlsx_data_validations PASSED                      [ 35%]
+test_struktur.py::test_xlsx_dashboard_has_three_charts PASSED            [ 41%]
+test_struktur.py::test_xlsx_zip_has_form_controls PASSED                 [ 47%]
+test_struktur.py::test_xlsx_no_codenames PASSED                          [ 52%]
+test_struktur.py::test_xlsm_vba_project_present PASSED                   [ 58%]
+test_struktur.py::test_xlsm_content_types_macro_enabled PASSED           [ 64%]
+test_struktur.py::test_xlsm_sheets_have_codenames PASSED                 [ 70%]
+test_struktur.py::test_xlsm_saker_b2_not_formula PASSED                  [ 76%]
+test_struktur.py::test_xlsm_helper_columns_empty PASSED                  [ 82%]
+test_struktur.py::test_xlsm_search_result_rows_empty PASSED              [ 88%]
+test_struktur.py::test_xlsm_status_mirror_and_checkbox PASSED            [ 94%]
+test_struktur.py::test_ods_calc_macro_parts PASSED                       [100%]
+
+============================= 17 passed in 0.91s ==============================
