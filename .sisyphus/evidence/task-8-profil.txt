@@ -1,0 +1,31 @@
+## T8 – Profil/byte-stabilitetsverifisering
+
+### Fallback `.xlsx` (ingen `--target`)
+Kjøring: `python lag_supportsystem.py`
+
+Innholds-sammenligning mot git HEAD `Supportsystem.xlsx` (normalisering av `docProps/core.xml` og `docProps/app.xml` + zip-tidsstempler):
+- Antall zip-oppføringer generert: 31
+- Antall zip-oppføringer HEAD: 31
+- Kun i generert: 0
+- Kun i HEAD: 0
+- Byte-ulikheter etter normalisering: **0**
+
+Fallback-filens oppførsel er uendret.
+
+### Andre måter å kjøre på
+- `python lag_supportsystem.py ren` -> `Supportsystem.xlsx` (tom), exit 0
+- `python lag_supportsystem.py ren --target excel` -> `Supportsystem.xlsm` (tom), exit 0
+- `python lag_supportsystem.py --target calc` -> `NotImplementedError` (T11)
+
+### Funksjoner endret/lagt til
+- `build_common.py`:
+  - `neste_rid(rels_xml)` – ny hjelpefunksjon
+  - `build_skeleton(profile)` – implementerte `timestamp_mechanism == "macro"` og `search_mechanism == "macro"`-greiner
+  - `injiser_vba_prosjekt(filnavn, bin_path)` – ny post-save VBA-injeksjon
+- `lag_supportsystem.py`:
+  - `--target excel` / `--target calc` parsing
+  - Velger `EXCEL_PROFILE` / `FALLBACK_PROFILE` etter target
+  - Kaller `injiser_vba_prosjekt(...)` for Excel-target
+
+### Oppsummering
+Fallbacken er innholds-stabil; `--target excel`-sporet er skilt ut og påvirker ikke `.xlsx`-utdata.

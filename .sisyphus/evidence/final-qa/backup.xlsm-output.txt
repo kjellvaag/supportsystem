@@ -1,0 +1,5 @@
+[2026-09-07 23:58:34] OK: Backup laget -> C:\Users\kjell\projects\supportsystem-oc1\backups\Supportsystem_20260907_235834.xlsm
+[2026-09-07 23:58:34] Rotert bort gammel kopi: Supportsystem_20260907_235458.xlsm
+
+
+exitcode=0

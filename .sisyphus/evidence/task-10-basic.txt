@@ -1,0 +1,50 @@
+T10 — Forfatt Basic-makroer (tekst) — STATUS: OK
+============================================================
+
+Forfattet StarBasic-kildekode (headless; ikke kompilert — soffice mangler, T15).
+
+Filer (basic/):
+  1. basic/ModFelles.bas
+       Function Normaliser(t As String) As String
+       Function Levenshtein(a As String, b As String) As Long
+       Function ScoreDok(query, tittel, nokkelord, problem, losning) As Long
+  2. basic/ModTidsstempel.bas
+       Sub StemplTidsstempel()
+  3. basic/ModSok.bas
+       Sub SokKB()
+       Sub SokSaker()
+       + hjelpere: Type Treff, SomTekst, DatoSomTall, ErBedre, SorterTreff,
+         ErTillatt, MarkerTreff, SkrivCelle, KopierDatoformat
+  4. basic/ModDashboard.bas
+       Sub OppdaterDashboard()
+       Function TellSaker(arr, kol0, verdi, antRader) As Long
+  5. basic/README.md  (modulstruktur + T11-innpakking i Basic/Standard/ModuleN.xml
+       + script-lb.xml/script-lc.xml)
+
+Nøkkelvalg (StarBasic/UNO):
+  - ThisComponent; Sheets.getByName(...); getCellByPosition(col, rad) 0-basert.
+  - Bulk-lesing via getCellRangeByName(...).getDataArray() (0-basert 2D-array).
+  - Normaliser FJERNER bindestrek: Replace(t, "-", "")  (KORREKSJON fra T5).
+  - ScoreDok: vekter tittel=4/nøkkelord=3/problem=2/løsning=1; eksakt InStr
+    først; fuzzy (Levenshtein<=2) kun når total=0; Exit For bryter kun ord-løkka.
+  - MarkerTreff: CellBackColor = 16771996 (=RGB(255,235,156)=FFEB9C) + CharWeight=150.
+    (StarBasic RGB = 0xRRGGBB = UNO-format direkte, motsatt av VBA.)
+  - Knapp-triggeret (LO har ingen Worksheet_Change); best-effort listener
+    dokumentert i kommentar i ModSok.bas.
+  - Diagrammer: levende Calc-diagrammer som leser hjelpetabellene direkte —
+    OppdaterDashboard skriver kun tall; ingen UNO-diagram-API nødvendig;
+    diagramobjekter flyttes aldri.
+  - Option Explicit bevisst utelatt (headless); T12/T15 kan slå det på.
+
+Scoring-kryssjekk: .sisyphus/evidence/task-10-score.txt
+  - score("wifi", {"title":"Wi-Fi nede"}) = 4 (eksakt), basic==orakel.
+  - score("wify", {"title":"Wi-Fi nede"}) = 4 (fuzzy), basic==orakel.
+  - 9/9 testtilfeller: Python-motpart (speiler Basic-løkkene) == kontrakt.score.
+  - Normaliser("Wi-Fi nede") = "wifi nede" (begge).
+
+Forutsetninger/antakelser:
+  - Knappetilordning gjøres i Calc-UI (Skjema > Trykknapp) eller via
+    dokumenthendelser — utsatt til T11/T12.
+  - B-kolonnen i Saker har allerede "DD.MM.YYYY HH:MM" fra generatoren, så
+    StemplTidsstempel skriver bare verdien (Now); søkeresultat-datoer får
+    format kopiert fra referanseceller (KB!H2 / Saker!B2) via KopierDatoformat.

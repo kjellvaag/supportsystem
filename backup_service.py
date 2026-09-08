@@ -32,9 +32,9 @@ class SupportBackupTjeneste(win32serviceutil.ServiceFramework):
     _svc_name_ = "SupportsystemBackup"
     _svc_display_name_ = "Supportsystem Backup"
     _svc_description_ = (
-        "Tar periodisk backup av Supportsystem.xlsx til lokal mappe og "
-        "valgfri nettverksdisk, med automatisk rotasjon av gamle kopier. "
-        "Innstillinger: backup_config.json."
+        "Tar periodisk backup av Supportsystem-filen (.xlsx/.xlsm/.ods) til "
+        "lokal mappe og valgfri nettverksdisk, med automatisk rotasjon av "
+        "gamle kopier. Innstillinger: backup_config.json."
     )
 
     def __init__(self, args):

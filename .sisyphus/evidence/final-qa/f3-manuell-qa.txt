@@ -1,0 +1,97 @@
+F3: Reell manuell QA – endelig rapport
+=======================================
+Dato: 2026-09-07
+Utført av: Sisyphus-Junior
+Arbeidskatalog: C:\Users\kjell\projects\supportsystem-oc1
+
+METODE
+------
+Startet fra ren tilstand (slettet Supportsystem.xlsx/.xlsm/.ods), kjørte
+`python lag_supportsystem.py ren` for alle tre targets, deretter sample-data-
+variant for æøå-sjekk. Verifiserte struktur med openpyxl, zip-inspeksjon,
+pytest og soffice headless round-trip. Backup-test endret midlertidig
+backup_config.json og gjenopprettet original verdi etterpå.
+
+Resultatformat:
+  Scenarios [pass/total] | Integration [pass/total] | Edge [tested] | VERDICT
+
+SCENARIER (8/8 PASS)
+--------------------
+1. Fallback .xlsx
+   - Ark-rekkefølge = Dashboard, Saker, Søk KB, Søk saker, Kunnskapsbase, Oppsett, Instruksjoner: OK
+   - codeName = None på alle ark (fallback skal ikke ha codenames): OK
+   - Saker!B2 inneholder sirkulær formel =IF($C2&$H2="",...NOW()...): OK
+   - Hjelpekolonner Saker!Y og Kunnskapsbase!L har formler: OK
+   - Ren modus: 0 saker / 0 KB-artikler: OK
+   RESULTAT: PASS
+
+2. Excel .xlsm
+   - xl/vbaProject.bin finnes i vba_archive: OK
+   - [Content_Types].xml har macroEnabled + vbaProject override: OK
+   - codeName mapping Sheet1..Sheet7 korrekt: OK
+   - Saker!B2 er tom (ikke formel, makroversjon): OK
+   - Ren modus: 0 saker / 0 KB-artikler: OK
+   RESULTAT: PASS
+
+3. Calc .ods
+   - Basic/Standard/Module1.xml .. Module4.xml finnes: OK
+   - Basic/script-lc.xml og Basic/Standard/script-lb.xml finnes: OK
+   - META-INF/manifest.xml inneholder entries for Basic/, script-lc.xml, script-lb.xml, Module1..4: OK
+   RESULTAT: PASS
+
+4. Backup endelsesbevaring
+   - kildefil=Supportsystem.xlsm ga backup Supportsystem_*.xlsm: OK
+   - kildefil=Supportsystem.ods ga backup Supportsystem_*.ods: OK
+   - backup_config.json gjenopprettet identisk: OK
+   RESULTAT: PASS
+
+5. Edge-cases
+   - Ren modus alle tre targets: 0 saker / 0 KB: OK
+   - Norske tegn (æøå) overlever i .xlsx: OK
+   - Norske tegn (æøå) overlever i .xlsm: OK
+   - Norske tegn (æøå) overlever i .ods etter soffice xlsx-konvertering: OK
+   - kontrakt.normalize("Wi-Fi nede") == "wifi nede": OK
+   - VBA-kilde (vba/ModFelles.bas) bruker Replace(...,"-",""): OK
+   - Basic-kilde (basic/ModFelles.bas) bruker Replace(...,"-",""): OK
+   - Voksende lister: dynamiske navn Ansatte, Kategorier, Prioriteter, Statuser, Kanaler finnes: OK
+   TESTEDE EDGE-CASES: 8
+   RESULTAT: PASS
+
+6. Kryss-integrasjon
+   - Slettet alle Supportsystem.*, genererte xlsx → xlsm → ods etter hverandre
+   - Alle tre kommandoer exit=0, alle tre filer eksisterer: OK
+   RESULTAT: PASS
+
+7. test_struktur.py
+   - `python -m pytest test_struktur.py -v` → 17 passed: OK
+   RESULTAT: PASS
+
+8. valider_soffice.py
+   - `python valider_soffice.py` → PASS (2/2 round-trip-konverteringer): OK
+   RESULTAT: PASS
+
+OPPSUMMERING
+------------
+Scenarios 8/8 PASS | Integration 1/1 PASS | Edge 8 tested PASS
+
+VERDIKT: APPROVE
+
+KJENTE AVVIK / NOTATER
+----------------------
+- Ingen funksjonelle avvik funnet under denne QA-runden.
+- VBA-trefffarge er kosmetisk feil (lyseblå i stedet for FFEB9C); dette er
+  dokumentert i learnings.md som åpen oppgave, men påvirker ikke struktur/
+  funksjon og er derfor ikke grunnlag for REJECT i F3.
+- .ods mangler automatisk knappetilknytning (manuell binding dokumentert i
+  README/basic/README); dette var kjent og godtatt i planen/T12.
+
+EVIDENSFILER
+------------
+- .sisyphus/evidence/final-qa/f3-struktur-sjekk.txt (detaljerte sjekker)
+- .sisyphus/evidence/final-qa/pytest-output.txt
+- .sisyphus/evidence/final-qa/soffice-output.txt
+- .sisyphus/evidence/final-qa/backup.xlsm-output.txt
+- .sisyphus/evidence/final-qa/backup.ods-output.txt
+- .sisyphus/evidence/final-qa/ods-conv-output.txt
+- .sisyphus/evidence/final-qa/f3_qa_sjekk.py (QA-skript)
+- .sisyphus/evidence/final-qa/f3_qa_sjekk-exitcode.txt (exit 0)

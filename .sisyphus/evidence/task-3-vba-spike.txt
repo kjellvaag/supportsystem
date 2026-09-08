@@ -1,0 +1,24 @@
+﻿=== T3 VBA-injeksjon spike - bevis ===
+Dato: 2026-09-07
+
+Steg 1: Donor .xlsm med Excel COM (pywin32)
+- Excel versjon: 16.0
+- Donor lagret: .sisyphus/evidence/spike/vba/donor.xlsm
+- Ekstraherte xl/vbaProject.bin (10240 bytes)
+
+Steg 2: Injeksjon i openpyxl-arbeidsbok
+- Minimal .xlsx laget med openpyxl
+- vbaProject.bin injisert
+- xl/_rels/workbook.xml.rels: vbaProject-relasjon lagt til (rId4)
+- [Content_Types].xml: workbook endret til macroEnabled + Override for vbaProject.bin
+- Resultat: .sisyphus/evidence/spike/vba/spike.xlsm
+
+Steg 3: Verifisering
+- openpyxl keep_vba: vbaProject.bin tilstede = True
+- Excel COM VBComponents: ['ThisWorkbook', 'Sheet1', 'SpikeModul', 'ThisWorkbook1', 'Sheet2']
+- SayHello funnet i standardmodul = True
+- Excel avsluttet uten hengende prosess
+
+KONKLUSJON: SPIKE OK - VBA-injeksjon i openpyxl-generert .xlsx fungerer, fil aapnes i Excel uten reparasjon, og makroen er tilstede/kjoerbar etter aktivering.
+
+Merk: Excel krevde registry-tweak AccessVBOM=1 for programmatisk VBProject-tilgang.

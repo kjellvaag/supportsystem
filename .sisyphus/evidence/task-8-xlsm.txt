@@ -1,0 +1,40 @@
+## T8 – `--target excel` / `.xlsm` verifisering
+
+Kjøring: `python lag_supportsystem.py --target excel`
+
+### Fil
+- `Supportsystem.xlsm` generert: JA
+- Størrelse: 117 071 bytes
+
+### VBA-injeksjon (openpyxl)
+- `xl/vbaProject.bin` finnes i zip: JA
+- `[Content_Types].xml` inneholder `macroEnabled`: JA
+- `[Content_Types].xml` inneholder `application/vnd.ms-office.vbaProject`: JA
+- `xl/_rels/workbook.xml.rels` inneholder vbaProject-relasjon: JA
+
+### codeNames
+- Dashboard -> Sheet1
+- Saker -> Sheet2
+- Søk KB -> Sheet3
+- Søk saker -> Sheet4
+- Kunnskapsbase -> Sheet5
+- Oppsett -> Sheet6
+- Instruksjoner -> Sheet7
+
+### Ingen fallback-formler i makrodelene
+- `Saker!B2` er statisk dato (sample-data), IKKE sirkulær formel; `B12` er tom
+- `Saker!Y2` er tom (ingen hjelpekolonneformel)
+- `Kunnskapsbase!L2` er tom (ingen hjelpekolonneformel)
+- `Søk KB!A7` er statisk prompt, resultatrader (f.eks. A9) er tomme
+- `Søk saker!A6` er statisk prompt, resultatrader (f.eks. A8) er tomme
+- Status-speilet `Søk saker!AA5` beholdes (checkbox-mirror)
+
+### Excel COM verifisering
+Excel åpnet `Supportsystem.xlsm` uten feil/reparasjon. VBComponents inneholdt de 4 modulene:
+- ModFelles
+- ModSok
+- ModDashboard
+- ModTidsstempel
+
+### Oppsummering
+`python lag_supportsystem.py --target excel` produserer en gyldig, makroaktivert `.xlsm` med VBA-prosjekt, korrekte codeNames, makrobassert tidsstempel og makrobassert søk.

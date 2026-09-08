@@ -1,0 +1,32 @@
+=== ORIGINAL CONFIG LAGRET ===
+Supportsystem.xlsx finnes: True
+Supportsystem.xlsm finnes: True
+Eksisterende .xlsx-backuper foer test: 6
+
+=== TEST A: kildefil=Supportsystem.xlsm, behold_antall=2, 3 kjoringer ===
+-- Kjoring 1 --
+-- Kjoring 2 --
+-- Kjoring 3 --
+--- .xlsm-backuper i backups\ etter 3 kjoringer ---
+  Supportsystem_20260907_174045.xlsm
+  Supportsystem_20260907_174049.xlsm
+Antall .xlsm gjenstaaende: 2 (forventet 2 -> rotasjon virker)
+Antall .xlsx-backuper etter test: 6 (uendret = True) -> rotasjon blander ikke endelser
+
+=== TEST B: dummy Supporter.ods, behold_antall=1, 2 kjoringer ===
+-- Kjoring 1 --
+-- Kjoring 2 --
+--- .ods-backuper i backups\ etter 2 kjoringer ---
+  Supportsystem_20260907_174055.ods
+Antall .ods gjenstaaende: 1 (forventet 1 -> rotasjon virker)
+
+=== CONFIG GJENOPPRETTET ===
+Config identisk med original: True
+
+=== RYDDET OPP (testfiler slettet) ===
+  Supportsystem_20260907_174045.xlsm
+  Supportsystem_20260907_174049.xlsm
+  Supportsystem_20260907_174055.ods
+Gjenstaaende .xlsm-testkopier: 0
+Gjenstaaende .ods-testkopier: 0
+Dummy .ods-kilde finnes: False

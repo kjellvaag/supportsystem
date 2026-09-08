@@ -1,0 +1,25 @@
+T6 – ScoreDok kryss-sjekk mot kontrakt.score
+============================================================
+Totalt 144 ScoreDok-sammenligninger (speil vs kontrakt): 0 avvik
+Normaliser-sammenligninger: 0 avvik
+Levenshtein-sammenligninger: 0 avvik
+
+Referanseverdier (doc = tittel 'Wi-Fi nede', nøkkelord 'wifi trådløs'):
+  score('wifi') = 7 (kontrakt 7)   <- eksakt delstreng, tittel 4 + nøkkelord 3
+  score('wify') = 7 (kontrakt 7)   <- fuzzy Levenshtein<=2, tittel 4 + nøkkelord 3
+
+COM (faktisk VBA i Excel): OK (AccessVBOM=1) – 144 ScoreDok-kall, 0 avvik; Normaliser('Wi-Fi nede')='wifi nede'; Levenshtein('wifi','wify')=1
+  KB-001 (Wi-Fi) q='wifi': VBA=8 kontrakt=8
+  KB-001 (Wi-Fi) q='wify': VBA=4 kontrakt=4
+  KB-001 (Wi-Fi) q='Wi-Fi': VBA=8 kontrakt=8
+  KB-001 (Wi-Fi) q='WIFI': VBA=8 kontrakt=8
+  KB-001 (Wi-Fi) q='  wifi  ': VBA=8 kontrakt=8
+  KB-001 (Wi-Fi) q='passord': VBA=0 kontrakt=0
+  KB-001 (Wi-Fi) q='vpn': VBA=7 kontrakt=7
+  KB-001 (Wi-Fi) q='skriver': VBA=0 kontrakt=0
+  KB-001 (Wi-Fi) q='papir': VBA=0 kontrakt=0
+  KB-001 (Wi-Fi) q='outlook': VBA=0 kontrakt=0
+  KB-001 (Wi-Fi) q='teams': VBA=0 kontrakt=0
+  KB-001 (Wi-Fi) q='tilgang': VBA=0 kontrakt=0
+
+RESULTAT: OK
